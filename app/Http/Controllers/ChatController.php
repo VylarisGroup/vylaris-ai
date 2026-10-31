@@ -373,6 +373,10 @@ class ChatController extends Controller
             $send = function (array $event) {
                 echo 'data: '.json_encode($event, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n\n";
 
+                if (app()->runningUnitTests()) {
+                    return;
+                }
+
                 if (ob_get_level() > 0) {
                     @ob_flush();
                 }

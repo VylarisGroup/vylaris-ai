@@ -19,6 +19,9 @@ class User extends Authenticatable implements MustVerifyEmail
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    /** @var array<string, mixed> */
+    protected $attributes = ['is_active' => true];
+
     protected function casts(): array
     {
         return [
