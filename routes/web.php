@@ -128,6 +128,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified.required',
         Route::patch('/settings', [Admin\SettingController::class, 'update'])->name('settings.update');
     });
 
+    Route::middleware('permission:admin.updates')->group(function () {
+        Route::get('/updates', [Admin\UpdateController::class, 'index'])->name('updates.index');
+        Route::post('/updates/check', [Admin\UpdateController::class, 'check'])->name('updates.check');
+        Route::post('/updates/apply', [Admin\UpdateController::class, 'apply'])->name('updates.apply');
+        Route::patch('/updates/settings', [Admin\UpdateController::class, 'settings'])->name('updates.settings');
+        Route::post('/updates/cron-token', [Admin\UpdateController::class, 'regenerateCronToken'])->name('updates.cron-token');
+    });
+
     Route::middleware('permission:admin.logs')->group(function () {
         Route::get('/usage', [Admin\LogController::class, 'usage'])->name('usage');
         Route::get('/errors', [Admin\LogController::class, 'errors'])->name('errors');

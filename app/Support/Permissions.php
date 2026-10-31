@@ -22,6 +22,7 @@ class Permissions
             'admin.users' => 'Benutzer und Rollen verwalten',
             'admin.settings' => 'Plattform-Einstellungen verwalten',
             'admin.logs' => 'Logs, Statistiken und Audit einsehen',
+            'admin.updates' => 'Updates und Cron-URL verwalten',
         ];
     }
 

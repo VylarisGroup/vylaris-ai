@@ -11,6 +11,7 @@ use App\Models\Provider;
 use App\Models\UsageLog;
 use App\Models\User;
 use App\Services\Features\FeatureManager;
+use App\Services\Update\UpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +54,23 @@ class DashboardController extends Controller
                 ->map(fn ($r) => ['name' => AiModel::find($r->ai_model_id)?->display_name ?? 'gelöscht', 'requests' => (int) $r->requests, 'tokens' => (int) $r->tokens, 'cost' => round((float) $r->cost, 4)]),
             'features' => collect($features->all())->map(fn ($f, $key) => ['key' => $key, 'name' => $f->name] + $features->status($key, auth()->user()))->values(),
             'providers' => Provider::withCount('models')->get(['id', 'name', 'is_enabled', 'is_fallback']),
+            'update' => $this->updateHint(),
         ]);
+    }
+
+    /**
+     * @return array{installed: string, remote: string}|null
+     */
+    private function updateHint(): ?array
+    {
+        if (! auth()->user()?->hasPermission('admin.updates')) {
+            return null;
+        }
+
+        $updates = app(UpdateService::class);
+        $remote = $updates->status()['remote'] ?? null;
+
+        return $remote && version_compare($remote, $updates->installedVersion(), '>') ? ['installed' => $updates->installedVersion(), 'remote' => $remote] : null;
     }
 
     public function system(Request $request): Response
@@ -89,6 +106,7 @@ class DashboardController extends Controller
         return Inertia::render('Admin/System', [
             'checks' => $checks,
             'info' => [
+                'version' => app(UpdateService::class)->installedVersion(),
                 'laravel' => app()->version(),
                 'environment' => app()->environment(),
                 'storage_used_mb' => round(collect(Storage::disk('private')->allFiles())->sum(fn ($f) => Storage::disk('private')->size($f)) / 1048576, 1),

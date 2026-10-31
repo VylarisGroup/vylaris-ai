@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Badge, Card, Table, Td } from '@/Components/ui';
+import { Alert, Badge, Card, Table, Td } from '@/Components/ui';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 function Stat({ label, value }) {
@@ -20,12 +20,13 @@ function Bars({ series, field, label }) {
     );
 }
 
-export default function Dashboard({ totals, series, topModels, features, providers }) {
+export default function Dashboard({ totals, series, topModels, features, providers, update }) {
     const n = (v) => Number(v).toLocaleString('de-CH');
 
     return (
         <AdminLayout title="Übersicht">
             <Head title="Admin" />
+            {update && <Alert type="info">Update verfügbar: {update.installed} → {update.remote}. <Link href={route('admin.updates.index')} className="font-medium underline">Zu den Updates</Link></Alert>}
             <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <Stat label="Benutzer" value={n(totals.users)} /><Stat label="Aktiv (7 Tage)" value={n(totals.active_users_7d)} />
                 <Stat label="Chats" value={n(totals.chats)} /><Stat label="Nachrichten" value={n(totals.messages)} />

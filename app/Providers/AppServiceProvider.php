@@ -37,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('chat', fn (Request $r) => Limit::perMinute(30)->by($r->user()?->id ?: $r->ip()));
         RateLimiter::for('uploads', fn (Request $r) => Limit::perMinute(20)->by($r->user()?->id ?: $r->ip()));
         RateLimiter::for('voice', fn (Request $r) => Limit::perMinute(40)->by($r->user()?->id ?: $r->ip()));
+        RateLimiter::for('cron', fn (Request $r) => Limit::perMinute(30)->by($r->ip()));
         RateLimiter::for('api-admin', fn (Request $r) => Limit::perMinute(120)->by($r->user()?->id ?: $r->ip()));
     }
 }

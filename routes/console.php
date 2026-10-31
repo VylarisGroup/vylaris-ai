@@ -16,3 +16,5 @@ Schedule::call(function () {
 })->daily()->name('prune-logs');
 
 Schedule::command('queue:prune-failed --hours=720')->daily();
+
+Schedule::command('vylaris:update --auto')->hourly()->withoutOverlapping(60)->name('auto-update');

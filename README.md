@@ -50,10 +50,34 @@ Danach im Admin-Bereich: **Provider & Modelle → Aus Vorlage anlegen**, API-Sch
 
 * `APP_ENV=production`, `APP_DEBUG=false`, HTTPS, `TRUSTED_PROXIES` bei Reverse-Proxy.
 * **Queue-Worker** (Dateiverarbeitung, Titel, Memory, Export): `php artisan queue:work --tries=2`  (z. B. via Supervisor/systemd).
-* **Scheduler** (Log-Bereinigung): Cron `* * * * * php artisan schedule:run`.
+* **Scheduler** (Log-Bereinigung, automatische Updates): Cron `* * * * * php artisan schedule:run` oder alternativ die Cron-URL (siehe unten).
 * Reverse-Proxy: Pufferung für `/chat/stream` ausschalten (`X-Accel-Buffering: no` wird gesendet).
 * Echte Mail-Konfiguration (`MAIL_*`) für E-Mail-Verifizierung, Passwort-Reset und Export-Benachrichtigung. Mit `MAIL_MAILER=log` werden keine E-Mails versendet (der Systemstatus weist darauf hin).
 * Für höhere Last `CACHE_STORE`/`QUEUE_CONNECTION`/`SESSION_DRIVER` auf Redis stellen; es sind keine Code-Änderungen nötig.
+
+## Updates über GitHub
+
+Die Plattform aktualisiert sich selbst direkt aus dem GitHub-ZIP: Sobald die Datei `VERSION` im Repository (Branch `main`) **höher** ist als die lokale `VERSION`, wird das Release geladen und installiert.
+
+* **Auslöser:** automatisch stündlich über den Scheduler (`vylaris:update --auto`, abschaltbar), manuell im Admin-Bereich unter *Updates & Cron* oder per Konsole (`php artisan vylaris:update`, `--check` prüft nur).
+* **Ablauf:** Version vergleichen → ZIP laden und validieren (Pfad-Prüfung gegen Zip-Slip, Grössenlimits, VERSION im Archiv = VERSION auf GitHub, Frontend-Build vorhanden) → Wartungsmodus → Dateien austauschen mit Backup → `composer install` (nur wenn sich `composer.lock` geändert hat und Composer verfügbar ist, sonst Abbruch *vor* jeder Änderung) → Migrationen → Caches leeren, Queue-Worker neu starten → `VERSION` schreiben → Wartungsmodus beenden.
+* **Sicherheitsnetz:** Schlägt ein Schritt fehl, werden alle geänderten Dateien aus dem Backup (`storage/app/updates/backup-*`, die letzten drei bleiben) wiederhergestellt. Ein fehlgeschlagenes Update wird nicht automatisch wiederholt.
+* **Unberührt bleiben:** `.env`, `storage/`, `vendor/`, `node_modules/`, SQLite-Dateien, `public/install.php` (nach der Installation).
+* **Privates Repository:** In *Updates & Cron* ein GitHub-Token (Lesezugriff auf *Contents*) hinterlegen; es wird verschlüsselt gespeichert. Repository und Branch sind dort ebenfalls einstellbar.
+
+**Release-Routine** (Voraussetzung: der Build liegt im Repository, da Server kein Node benötigen):
+
+```bash
+npm run build                 # public/build wird mit eingecheckt
+echo 2.3.0 > VERSION          # erst zuletzt erhöhen
+git add -A && git commit -m "Release 2.3.0" && git push
+```
+
+Ohne `public/build/manifest.json` im Release bricht der Updater zum Schutz der Installation ab.
+
+## Cron per URL
+
+Hosting ohne Shell-Cron (z. B. Plesk-„Geplante Aufgaben“ → *URL abrufen*, cron-job.org): Die URL aus *Admin → Updates & Cron* (`/cron/<geheimer-token>`) jede Minute aufrufen. Sie führt `schedule:run` aus und – bei Datenbank-Queue – für bis zu 40 Sekunden den Queue-Worker (`--stop-when-empty`). Die Route läuft ohne Session/Cookies, ist ratenbegrenzt und gegen parallele Läufe gesperrt. Anzeigen oder neu erzeugen: Admin-Bereich oder `php artisan vylaris:cron-token [--regenerate]`.
 
 ## Architektur
 

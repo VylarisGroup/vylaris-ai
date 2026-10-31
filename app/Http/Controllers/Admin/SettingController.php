@@ -15,7 +15,7 @@ class SettingController extends Controller
     public function index(SettingsService $settings): Response
     {
         return Inertia::render('Admin/Settings', [
-            'definitions' => collect(SettingsService::definitions())->map(fn ($d, $key) => ['key' => $key] + collect($d)->except('default')->all())->values(),
+            'definitions' => collect(SettingsService::definitions())->reject(fn ($d) => $d['hidden'] ?? false)->map(fn ($d, $key) => ['key' => $key] + collect($d)->except('default')->all())->values(),
             'values' => $settings->forAdmin(),
         ]);
     }
@@ -27,7 +27,7 @@ class SettingController extends Controller
         $changed = [];
 
         foreach ($definitions as $key => $definition) {
-            if (! array_key_exists($key, $input)) {
+            if (($definition['hidden'] ?? false) || ! array_key_exists($key, $input)) {
                 continue;
             }
 

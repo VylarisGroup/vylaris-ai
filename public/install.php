@@ -278,6 +278,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! $blocked) {
             $kernel->call('vylaris:make-admin', ['email' => $input['admin_email'], '--name' => $input['admin_name'], '--password' => $input['admin_pass']]);
             $log[] = 'Rollen, Funktionskatalog und Administrator angelegt.';
 
+            $kernel->call('vylaris:cron-token');
+            $cronUrl = trim($kernel->output());
+
             $kernel->call('config:clear');
 
             file_put_contents($lockFile, date('c')."\n");
@@ -293,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! $blocked) {
                 .'<li>'.($removed ? '<code>install.php</code> wurde automatisch gelöscht.' : '<strong class="warn">Bitte lösche <code>public/install.php</code> manuell.</strong>').'</li>'
                 .'<li>Melde dich an und richte unter <em>Admin → Provider &amp; Modelle</em> einen KI-Anbieter mit API-Schlüssel ein.</li>'
                 .($input['queue'] === 'sync' ? '<li>Hintergrundjobs laufen synchron. Für bessere Performance später <code>QUEUE_CONNECTION=database</code> setzen und <code>php artisan queue:work</code> betreiben.</li>' : '<li>Starte den Queue-Worker: <code>php artisan queue:work --tries=2</code>.</li>')
-                .'<li>Richte den Cronjob ein: <code>* * * * * php '.h($root).'/artisan schedule:run</code></li>'
+                .'<li>Cron einrichten (jede Minute): entweder per Crontab <code>* * * * * php '.h($root).'/artisan schedule:run</code> oder – ohne Shell – per URL-Aufruf (z. B. Plesk „Geplante Aufgaben → URL abrufen“, cron-job.org):<pre>'.h($cronUrl).'</pre>Die URL ist geheim und auch im Admin-Bereich unter <em>Updates &amp; Cron</em> zu finden. Der Cron löst auch automatische Updates aus.</li>'
                 .($input['mail_host'] === '' ? '<li class="warn">E-Mail-Versand ist nicht konfiguriert (Mails werden nur ins Log geschrieben). Setze <code>MAIL_*</code> in der <code>.env</code>, damit Verifizierung und Passwort-Reset funktionieren.</li>' : '')
                 .'</ol><a class="btn" href="'.h(rtrim($input['app_url'], '/')).'/login">Zum Login</a>';
 

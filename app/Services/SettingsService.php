@@ -31,6 +31,14 @@ class SettingsService
             'oauth_google_client_secret' => ['label' => 'Google OAuth Client-Secret', 'type' => 'string', 'default' => '', 'secret' => true, 'group' => 'OAuth'],
             'oauth_github_client_id' => ['label' => 'GitHub OAuth Client-ID', 'type' => 'string', 'default' => '', 'group' => 'OAuth'],
             'oauth_github_client_secret' => ['label' => 'GitHub OAuth Client-Secret', 'type' => 'string', 'default' => '', 'secret' => true, 'group' => 'OAuth'],
+            // Interne Einstellungen (Updater/Cron): werden über eigene Seiten verwaltet, nicht in den Plattform-Einstellungen.
+            'update_repo' => ['label' => 'Update-Repository', 'type' => 'string', 'default' => 'VylarisGroup/vylaris-ai', 'group' => 'Updates', 'hidden' => true],
+            'update_branch' => ['label' => 'Update-Branch', 'type' => 'string', 'default' => 'main', 'group' => 'Updates', 'hidden' => true],
+            'update_token' => ['label' => 'GitHub-Token', 'type' => 'string', 'default' => '', 'secret' => true, 'group' => 'Updates', 'hidden' => true],
+            'update_auto' => ['label' => 'Automatische Updates', 'type' => 'bool', 'default' => true, 'group' => 'Updates', 'hidden' => true],
+            'update_status' => ['label' => 'Update-Status', 'type' => 'text', 'default' => '', 'group' => 'Updates', 'hidden' => true],
+            'cron_token' => ['label' => 'Cron-Token', 'type' => 'string', 'default' => '', 'secret' => true, 'group' => 'Cron', 'hidden' => true],
+            'cron_last_run' => ['label' => 'Letzter Cron-Aufruf', 'type' => 'string', 'default' => '', 'group' => 'Cron', 'hidden' => true],
         ];
     }
 
@@ -105,6 +113,10 @@ class SettingsService
         $values = [];
 
         foreach (self::definitions() as $key => $definition) {
+            if ($definition['hidden'] ?? false) {
+                continue;
+            }
+
             $value = $this->get($key);
             $values[$key] = ($definition['secret'] ?? false) ? ($value ? '********' : '') : $value;
         }
