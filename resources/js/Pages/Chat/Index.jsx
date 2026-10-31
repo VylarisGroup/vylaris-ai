@@ -3,6 +3,7 @@ import { FolderKanban, LogOut, Menu as MenuIcon, PanelLeftClose, Settings as Set
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import BotAvatar from '@/Components/chat/BotAvatar';
 import Composer from '@/Components/chat/Composer';
+import { PendingAssistant } from '@/Components/chat/BotAvatar';
 import Message from '@/Components/chat/Message';
 import Sidebar from '@/Components/chat/Sidebar';
 import ThemeToggle from '@/Components/ThemeToggle';
@@ -379,6 +380,7 @@ export default function ChatIndex({ chat: initialChat, messages: initialMessages
                                     onNotice={setNotice}
                                 />
                             ))}
+                            {streaming && !(messages[messages.length - 1]?.role === 'assistant' && messages[messages.length - 1]?.status === 'streaming') && <PendingAssistant />}
                         </div>
                     )}
                 </div>

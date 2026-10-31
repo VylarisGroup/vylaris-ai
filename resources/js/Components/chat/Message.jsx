@@ -1,8 +1,7 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { AlertTriangle, ChevronRight, Download, FileText, Loader2, Pencil, RefreshCw, ThumbsDown, ThumbsUp, Volume2, VolumeX, Copy, Check, Globe, Wrench } from 'lucide-react';
 import { memo, useState } from 'react';
-import { ThinkingOrb } from 'thinking-orbs';
-import BotAvatar from '@/Components/chat/BotAvatar';
+import BotAvatar, { OrbLoader, orbPhase } from '@/Components/chat/BotAvatar';
 import Markdown from '@/Components/chat/Markdown';
 import { Button, IconButton, Textarea, cx } from '@/Components/ui';
 import { useTts } from '@/hooks/useVoice';
@@ -153,7 +152,6 @@ function AssistantMessage({ message, isLast, streaming, onRegenerate, onRate, fe
     const [copied, setCopied] = useState(false);
     const [exporting, setExporting] = useState(false);
     const live = message.status === 'streaming';
-    const waiting = live && !message.content;
     const ttsReady = features?.tts?.configured;
     const docsReady = features?.documents?.configured && !String(message.id).startsWith('tmp');
 
@@ -179,11 +177,11 @@ function AssistantMessage({ message, isLast, streaming, onRegenerate, onRate, fe
         }
     };
 
-    const orbState = message.tool_events?.some((t) => t.status === 'running') ? 'searching' : message.content ? 'composing' : 'working';
+    const phase = orbPhase(message);
 
     return (
         <div className="flex gap-3">
-            <BotAvatar state={live ? orbState : 'breathing'} paused={!live} />
+            <BotAvatar state={live ? phase.state : 'breathing'} paused={!live} />
             <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-center gap-2 text-xs text-gray-500 dark:text-zinc-400">
                     <span className="font-medium">{message.model || 'Assistent'}</span>
@@ -193,14 +191,8 @@ function AssistantMessage({ message, isLast, streaming, onRegenerate, onRate, fe
                 <ToolEvents events={message.tool_events} />
                 <Reasoning text={message.reasoning} />
 
-                {waiting ? (
-                    <div className="flex items-center gap-2 py-1 text-sm text-gray-500 dark:text-zinc-400" role="status">
-                        <ThinkingOrb state={orbState} size={20} style={{ width: 20, height: 20 }} theme="auto" />
-                        <span>{orbState === 'searching' ? 'Recherchiert…' : 'Denkt nach…'}</span>
-                    </div>
-                ) : (
-                    message.content && <Markdown content={message.content} />
-                )}
+                {message.content && <Markdown content={message.content} />}
+                {live && <OrbLoader state={phase.state} label={phase.label} />}
 
                 {message.status === 'error' && (
                     <div className="mt-2 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-200" role="alert">
