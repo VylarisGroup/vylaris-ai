@@ -20,6 +20,17 @@ Funktionen, die nicht eingerichtet sind (z. B. kein TTS-Modell, kein Suchanbiete
 
 ## Installation
 
+### Variante A: Web-Installer (ohne Konsole, z. B. Shared Hosting/Plesk)
+
+1. Projekt hochladen; Document-Root auf `public/` setzen. `vendor/` (`composer install --no-dev`) und `public/build/` (`npm run build`) müssen vorhanden sein.
+2. Die Seite im Browser aufrufen – ohne `.env` leitet sie automatisch auf `/install.php` weiter.
+3. Den Installationsschlüssel aus `storage/app/install-key.txt` eingeben (schützt vor Übernahme durch Dritte), Plattform, Datenbank (SQLite oder MySQL), Queue-Modus, optional SMTP und den Administrator angeben.
+4. Der Installer prüft das System, schreibt die `.env` (inkl. `APP_KEY`), führt Migrationen aus, legt Rollen, Funktionskatalog und Admin an, sperrt sich (`storage/app/installed.lock`) und löscht sich selbst. Fehlgeschlagene Läufe können nach Behebung der Ursache wiederholt werden.
+
+Der Installer läuft nur auf einer frischen Installation (ohne `APP_KEY`); eine bestehende Installation wird nie überschrieben.
+
+### Variante B: Konsole
+
 ```bash
 composer install
 npm install
