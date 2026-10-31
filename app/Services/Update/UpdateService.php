@@ -233,7 +233,7 @@ class UpdateService
             }
 
             $this->install($source, $plan, $work.'/backup', $changes);
-            $log(count($plan['copy']).' Dateien aktualisiert, '.count($plan['delete']).' entfernt.');
+            $log((count($changes['created']) + count($changes['replaced']) - count($plan['delete'])).' Dateien geändert, '.count($plan['delete']).' entfernt.');
 
             if ($this->runCommands) {
                 if ($release['composer_changed'] && ($composer ?? null)) {
