@@ -1,100 +1,30 @@
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import OAuthButtons from '@/Components/OAuthButtons';
+import { Alert, Button, Field, Input } from '@/Components/ui';
+import GuestLayout from '@/Layouts/GuestLayout';
 
 export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
-    });
-
+    const form = useForm({ email: '', password: '', remember: false });
     const submit = (e) => {
         e.preventDefault();
-
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
+        form.post(route('login'), { onFinish: () => form.reset('password') });
     };
 
     return (
-        <GuestLayout>
-            <Head title="Log in" />
-
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
+        <GuestLayout title="Anmelden">
+            <Head title="Anmelden" />
+            {status && <div className="mb-4"><Alert type="success">{status}</Alert></div>}
+            <form onSubmit={submit} className="space-y-4">
+                <Field label="E-Mail" error={form.errors.email}><Input type="email" autoComplete="username" autoFocus value={form.data.email} onChange={(e) => form.setData('email', e.target.value)} required /></Field>
+                <Field label="Passwort" error={form.errors.password}><Input type="password" autoComplete="current-password" value={form.data.password} onChange={(e) => form.setData('password', e.target.value)} required /></Field>
+                <div className="flex items-center justify-between text-sm">
+                    <label className="flex items-center gap-2"><input type="checkbox" className="rounded border-gray-300 text-brand-600" checked={form.data.remember} onChange={(e) => form.setData('remember', e.target.checked)} />Angemeldet bleiben</label>
+                    {canResetPassword && <Link href={route('password.request')} className="text-brand-600 hover:underline dark:text-brand-300">Passwort vergessen?</Link>}
                 </div>
-            )}
-
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) =>
-                                setData('remember', e.target.checked)
-                            }
-                        />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
-                        </span>
-                    </label>
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-                </div>
+                <Button type="submit" className="w-full" loading={form.processing}>Anmelden</Button>
             </form>
+            <OAuthButtons />
+            <p className="mt-5 text-center text-sm text-gray-500">Noch kein Konto? <Link href={route('register')} className="text-brand-600 hover:underline dark:text-brand-300">Registrieren</Link></p>
         </GuestLayout>
     );
 }

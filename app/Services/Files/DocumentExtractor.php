@@ -69,7 +69,7 @@ class DocumentExtractor
 
         $xml = preg_replace('/<w:tab\/>/', "\t", $xml);
         $xml = preg_replace('/<\/w:p>/', "\n", $xml);
-        $xml = preg_replace('/<\/w:tc>/', " | ", $xml);
+        $xml = preg_replace('/<\/w:tc>/', ' | ', $xml);
 
         return trim(html_entity_decode(strip_tags($xml), ENT_QUOTES | ENT_XML1, 'UTF-8'));
     }

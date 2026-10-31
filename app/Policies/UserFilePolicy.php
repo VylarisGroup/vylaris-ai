@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\UserFile;
 use App\Models\User;
+use App\Models\UserFile;
 
 /**
  * Strikte Datentrennung: Zugriff nur auf eigene Datensätze.

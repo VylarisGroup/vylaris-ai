@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Services\Features\FeatureManager;
 use App\Services\SettingsService;
+use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,7 +36,7 @@ class HandleInertiaRequests extends Middleware
                     'email_verified' => $user->hasVerifiedEmail(),
                     'role' => $user->role?->name,
                     'is_admin' => $user->isAdmin(),
-                    'permissions' => collect(array_keys(\App\Support\Permissions::all()))->filter(fn ($p) => $user->hasPermission($p))->values(),
+                    'permissions' => collect(array_keys(Permissions::all()))->filter(fn ($p) => $user->hasPermission($p))->values(),
                     'preferences' => $user->preferences ?? (object) [],
                 ] : null,
             ],

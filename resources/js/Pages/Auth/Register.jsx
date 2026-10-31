@@ -1,120 +1,27 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import OAuthButtons from '@/Components/OAuthButtons';
+import { Button, Field, Input } from '@/Components/ui';
+import GuestLayout from '@/Layouts/GuestLayout';
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
-
+    const form = useForm({ name: '', email: '', password: '', password_confirmation: '' });
     const submit = (e) => {
         e.preventDefault();
-
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+        form.post(route('register'), { onFinish: () => form.reset('password', 'password_confirmation') });
     };
 
     return (
-        <GuestLayout>
-            <Head title="Register" />
-
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
-
-                    <TextInput
-                        id="name"
-                        name="name"
-                        value={data.name}
-                        className="mt-1 block w-full"
-                        autoComplete="name"
-                        isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.name} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                        required
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <TextInput
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        value={data.password_confirmation}
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        required
-                    />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        href={route('login')}
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Already registered?
-                    </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
-                    </PrimaryButton>
-                </div>
+        <GuestLayout title="Konto erstellen" subtitle="Mit der Registrierung stimmst du der Verarbeitung deiner Daten gemäss Datenschutzerklärung (DSG/DSGVO) zu. Deine Eingaben werden zur Beantwortung an externe KI-Anbieter übermittelt.">
+            <Head title="Registrieren" />
+            <form onSubmit={submit} className="space-y-4">
+                <Field label="Name" error={form.errors.name}><Input autoComplete="name" autoFocus value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} required /></Field>
+                <Field label="E-Mail" error={form.errors.email}><Input type="email" autoComplete="username" value={form.data.email} onChange={(e) => form.setData('email', e.target.value)} required /></Field>
+                <Field label="Passwort" error={form.errors.password}><Input type="password" autoComplete="new-password" value={form.data.password} onChange={(e) => form.setData('password', e.target.value)} required /></Field>
+                <Field label="Passwort bestätigen" error={form.errors.password_confirmation}><Input type="password" autoComplete="new-password" value={form.data.password_confirmation} onChange={(e) => form.setData('password_confirmation', e.target.value)} required /></Field>
+                <Button type="submit" className="w-full" loading={form.processing}>Registrieren</Button>
             </form>
+            <OAuthButtons />
+            <p className="mt-5 text-center text-sm text-gray-500">Bereits registriert? <Link href={route('login')} className="text-brand-600 hover:underline dark:text-brand-300">Anmelden</Link></p>
         </GuestLayout>
     );
 }

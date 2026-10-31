@@ -5,13 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Agent;
 use App\Models\AiModel;
 use App\Models\Chat;
-use App\Models\Folder;
 use App\Models\Message;
-use App\Models\Project;
 use App\Models\User;
 use App\Models\UserFile;
 use App\Services\Ai\ChatRunner;
 use App\Services\Ai\ModelRouter;
+use App\Services\Features\FeatureManager;
 use App\Services\Files\DocumentBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -93,7 +92,7 @@ class ChatController extends Controller
      */
     private function voiceConfig(): array
     {
-        $features = app(\App\Services\Features\FeatureManager::class);
+        $features = app(FeatureManager::class);
         $tts = $features->config('tts');
         $stt = $features->config('stt');
 
@@ -246,7 +245,7 @@ class ChatController extends Controller
     {
         Gate::authorize('view', $message);
         $user = $request->user();
-        abort_unless(app(\App\Services\Features\FeatureManager::class)->enabled('documents', $user), 403, 'Dokumentenerstellung ist nicht verfügbar.');
+        abort_unless(app(FeatureManager::class)->enabled('documents', $user), 403, 'Dokumentenerstellung ist nicht verfügbar.');
 
         $data = $request->validate(['format' => ['required', Rule::in(DocumentBuilder::FORMATS)], 'title' => ['nullable', 'string', 'max:120']]);
 
@@ -272,6 +271,7 @@ class ChatController extends Controller
             'file_ids' => ['nullable', 'array', 'max:20', 'required_without:content'],
             'file_ids.*' => ['integer', Rule::exists('files', 'id')->where('user_id', $user->id)],
             'web_search' => ['nullable', 'boolean'],
+            'image_mode' => ['nullable', 'boolean'],
             'agent_id' => ['nullable', 'integer', 'exists:agents,id'],
             'parameters' => ['nullable', 'array'],
         ]);
@@ -365,6 +365,7 @@ class ChatController extends Controller
 
         $options = [
             'web_search' => (bool) ($data['web_search'] ?? false),
+            'image_mode' => (bool) ($data['image_mode'] ?? false),
             'agent_id' => $data['agent_id'] ?? null,
             'parameters' => $data['parameters'] ?? $chat->parameters ?? [],
         ];

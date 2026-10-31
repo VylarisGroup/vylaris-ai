@@ -14,8 +14,10 @@ use App\Models\UserFile;
 use App\Services\Features\FeatureManager;
 use App\Services\Features\UsageLimiter;
 use App\Services\Features\WebSearchService;
+use App\Services\Tools\Tool;
 use App\Services\Tools\ToolContext;
 use App\Services\Tools\ToolRegistry;
+use App\Services\Tools\ToolResult;
 use Generator;
 use Illuminate\Support\Facades\Log;
 
@@ -85,7 +87,17 @@ class ChatRunner
             }
         }
 
-        $messages = $this->context->build($chat, $user, $model, $userMessage, ['web_sources' => $webSources, 'agent_instructions' => $agent?->instructions]);
+        $agentInstructions = $agent?->instructions;
+
+        if (! empty($options['image_mode'])) {
+            if (isset($toolSet['generate_image'])) {
+                $agentInstructions = trim(($agentInstructions ? $agentInstructions."\n\n" : '').'Der Benutzer möchte ein Bild erzeugen. Rufe zwingend das Werkzeug generate_image mit einem passenden, detaillierten Prompt auf und beschreibe das Ergebnis danach kurz.');
+            } else {
+                yield ['type' => 'notice', 'message' => 'Bildgenerierung ist nicht konfiguriert oder für diese Anfrage nicht verfügbar.'];
+            }
+        }
+
+        $messages = $this->context->build($chat, $user, $model, $userMessage, ['web_sources' => $webSources, 'agent_instructions' => $agentInstructions]);
         $overrides = $this->gateway->sanitizeParameters($model, $options['parameters'] ?? $chat->parameters ?? []);
 
         $assistant = $chat->messages()->create([
@@ -172,13 +184,13 @@ class ChatRunner
                     yield ['type' => 'tool', 'name' => $call['name'], 'status' => 'running', 'summary' => $tool?->label() ?? $call['name']];
 
                     if (! $tool) {
-                        $result = new \App\Services\Tools\ToolResult('Unbekanntes oder nicht verfügbares Tool.');
+                        $result = new ToolResult('Unbekanntes oder nicht verfügbares Tool.');
                     } else {
                         try {
                             $result = $tool->run($arguments, $context);
                         } catch (\Throwable $e) {
                             Log::warning("Tool {$call['name']} fehlgeschlagen: ".$e->getMessage());
-                            $result = new \App\Services\Tools\ToolResult('Das Tool ist fehlgeschlagen.');
+                            $result = new ToolResult('Das Tool ist fehlgeschlagen.');
                         }
                     }
 
@@ -258,7 +270,7 @@ class ChatRunner
     }
 
     /**
-     * @return array<string, \App\Services\Tools\Tool>
+     * @return array<string, Tool>
      */
     private function toolSet(AiModel $model, ToolContext $context, ?Agent $agent): array
     {

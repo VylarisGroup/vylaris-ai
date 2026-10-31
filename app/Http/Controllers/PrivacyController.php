@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ExportUserDataJob;
 use App\Models\Chat;
+use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -64,7 +65,7 @@ class PrivacyController extends Controller
         $request->validate(['password' => ['required', 'current_password']]);
         $user = $request->user();
 
-        abort_if($user->isAdmin() && \App\Models\User::whereHas('role', fn ($q) => $q->where('slug', 'admin'))->where('is_active', true)->count() <= 1, 422, 'Der letzte Administrator kann nicht gelöscht werden.');
+        abort_if($user->isAdmin() && User::whereHas('role', fn ($q) => $q->where('slug', 'admin'))->where('is_active', true)->count() <= 1, 422, 'Der letzte Administrator kann nicht gelöscht werden.');
 
         AuditService::log('account.deleted', $user, ['email_hash' => hash('sha256', $user->email)]);
 

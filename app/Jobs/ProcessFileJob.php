@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Enums\Capability;
 use App\Models\KnowledgeChunk;
-use App\Models\User;
 use App\Models\UserFile;
 use App\Services\Ai\AiException;
 use App\Services\Ai\AiGateway;

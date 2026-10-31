@@ -8,6 +8,7 @@ use App\Models\Memory;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\UserFile;
+use App\Notifications\DataExportReady;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -47,7 +48,7 @@ class PrivacyTest extends TestCase
         $this->assertStringContainsString('mag Kaffee', $json);
         $this->assertStringNotContainsString('fremde frage', $json);
         $this->assertStringNotContainsString('Fremder Chat', $json);
-        Notification::assertSentTo($user, \App\Notifications\DataExportReady::class);
+        Notification::assertSentTo($user, DataExportReady::class);
     }
 
     public function test_export_download_is_limited_to_owner(): void

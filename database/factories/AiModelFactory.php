@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\AiModel;
 use App\Models\Provider;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * @extends Factory<AiModel>

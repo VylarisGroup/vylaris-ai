@@ -6,6 +6,7 @@ use App\Enums\Capability;
 use App\Http\Controllers\Controller;
 use App\Models\AiModel;
 use App\Models\Provider;
+use App\Services\Ai\AiGateway;
 use App\Services\AuditService;
 use App\Services\Features\FeatureManager;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +33,7 @@ class ModelController extends Controller
             'parameters.reasoning_effort' => ['nullable', Rule::in(['low', 'medium', 'high'])],
             'parameters._stream_usage' => ['nullable', 'boolean'],
             'allowed_parameters' => ['nullable', 'array'],
-            'allowed_parameters.*' => ['string', Rule::in(array_keys(\App\Services\Ai\AiGateway::PARAMETER_RANGES))],
+            'allowed_parameters.*' => ['string', Rule::in(array_keys(AiGateway::PARAMETER_RANGES))],
             'context_window' => ['nullable', 'integer', 'min:0'],
             'price_input' => ['nullable', 'numeric', 'min:0'],
             'price_output' => ['nullable', 'numeric', 'min:0'],

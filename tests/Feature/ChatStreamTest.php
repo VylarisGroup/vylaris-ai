@@ -6,6 +6,7 @@ use App\Jobs\ExtractMemoriesJob;
 use App\Jobs\GenerateChatTitleJob;
 use App\Models\Chat;
 use App\Models\ErrorLog;
+use App\Models\Provider;
 use App\Models\UsageLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -34,6 +35,18 @@ class ChatStreamTest extends TestCase
 
         Queue::assertPushed(GenerateChatTitleJob::class);
         Queue::assertPushed(ExtractMemoriesJob::class);
+    }
+
+    public function test_image_mode_without_image_generation_reports_not_configured(): void
+    {
+        $user = $this->makeUser();
+        $model = $this->makeChatModel();
+        Http::fake(['*' => Http::response($this->sseBody(['ok']), 200)]);
+
+        $body = $this->actingAs($user)->post('/chat/stream', ['content' => 'Male eine Katze', 'model_id' => $model->id, 'image_mode' => true])->streamedContent();
+
+        $this->assertStringContainsString('Bildgenerierung ist nicht konfiguriert', $body);
+        $this->assertStringContainsString('"type":"done"', $body);
     }
 
     public function test_streams_answer_persists_messages_and_logs_usage(): void
@@ -78,7 +91,7 @@ class ChatStreamTest extends TestCase
     {
         $user = $this->makeUser();
         $primary = $this->makeChatModel();
-        $fallbackProvider = \App\Models\Provider::factory()->fallback()->create(['base_url' => 'https://fallback.example-ai.test/v1']);
+        $fallbackProvider = Provider::factory()->fallback()->create(['base_url' => 'https://fallback.example-ai.test/v1']);
         $fallback = $this->makeChatModel(attributes: ['provider_id' => $fallbackProvider->id, 'display_name' => 'Fallback-Modell']);
 
         Http::fake([

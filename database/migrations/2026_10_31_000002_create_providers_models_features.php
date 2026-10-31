@@ -34,7 +34,7 @@ return new class extends Migration
             $table->string('display_name');
             $table->string('tier')->default('balanced');   // fast | balanced | strong
             $table->json('parameters')->nullable();        // Standardparameter (temperature, top_p, max_tokens, ...)
-            $table->json('allowed_parameters')->nullable();// Parameter, die Nutzer ändern dürfen
+            $table->json('allowed_parameters')->nullable(); // Parameter, die Nutzer ändern dürfen
             $table->unsignedInteger('context_window')->nullable();
             $table->decimal('price_input', 12, 6)->default(0);   // pro 1 Mio. Tokens
             $table->decimal('price_output', 12, 6)->default(0);  // pro 1 Mio. Tokens

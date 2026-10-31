@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Chat;
 use App\Models\Message;
+use App\Models\User;
 use App\Models\UserFile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CreatesPlatform;
@@ -74,9 +75,9 @@ class AccessControlTest extends TestCase
 
     public function test_new_user_gets_default_role_and_first_user_becomes_admin(): void
     {
-        \App\Models\User::query()->delete();
-        $first = \App\Models\User::factory()->create(['role_id' => null]);
-        $second = \App\Models\User::factory()->create(['role_id' => null]);
+        User::query()->delete();
+        $first = User::factory()->create(['role_id' => null]);
+        $second = User::factory()->create(['role_id' => null]);
 
         $this->assertSame('admin', $first->fresh()->role->slug);
         $this->assertSame('user', $second->fresh()->role->slug);

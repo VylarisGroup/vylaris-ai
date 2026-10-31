@@ -4,6 +4,10 @@ namespace Tests\Feature;
 
 use App\Jobs\ProcessFileJob;
 use App\Models\UserFile;
+use App\Services\Ai\AiGateway;
+use App\Services\Features\FeatureManager;
+use App\Services\Files\Chunker;
+use App\Services\Files\DocumentExtractor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
@@ -73,7 +77,7 @@ class FileUploadTest extends TestCase
         Storage::disk('private')->put('uploads/1/a.csv', "name;wert\nAlpha;10\nBeta;20\n");
         $file = UserFile::factory()->create(['user_id' => $user->id, 'path' => 'uploads/1/a.csv', 'original_name' => 'a.csv', 'mime' => 'text/csv', 'status' => 'pending', 'extracted_text' => null]);
 
-        (new ProcessFileJob($file->id))->handle(app(\App\Services\Files\DocumentExtractor::class), app(\App\Services\Files\Chunker::class), app(\App\Services\Features\FeatureManager::class), app(\App\Services\Ai\AiGateway::class));
+        (new ProcessFileJob($file->id))->handle(app(DocumentExtractor::class), app(Chunker::class), app(FeatureManager::class), app(AiGateway::class));
 
         $this->assertSame('ready', $file->fresh()->status);
         $this->assertStringContainsString('Alpha | 10', $file->fresh()->makeVisible('extracted_text')->extracted_text);

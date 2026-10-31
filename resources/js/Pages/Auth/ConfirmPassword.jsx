@@ -1,54 +1,16 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
+import { Button, Field, Input } from '@/Components/ui';
+import GuestLayout from '@/Layouts/GuestLayout';
 
 export default function ConfirmPassword() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        password: '',
-    });
-
-    const submit = (e) => {
-        e.preventDefault();
-
-        post(route('password.confirm'), {
-            onFinish: () => reset('password'),
-        });
-    };
+    const form = useForm({ password: '' });
 
     return (
-        <GuestLayout>
-            <Head title="Confirm Password" />
-
-            <div className="mb-4 text-sm text-gray-600">
-                This is a secure area of the application. Please confirm your
-                password before continuing.
-            </div>
-
-            <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Confirm
-                    </PrimaryButton>
-                </div>
+        <GuestLayout title="Passwort bestätigen" subtitle="Dies ist ein geschützter Bereich. Bitte bestätige dein Passwort.">
+            <Head title="Passwort bestätigen" />
+            <form onSubmit={(e) => { e.preventDefault(); form.post(route('password.confirm'), { onFinish: () => form.reset('password') }); }} className="space-y-4">
+                <Field label="Passwort" error={form.errors.password}><Input type="password" autoFocus value={form.data.password} onChange={(e) => form.setData('password', e.target.value)} required /></Field>
+                <Button type="submit" className="w-full" loading={form.processing}>Bestätigen</Button>
             </form>
         </GuestLayout>
     );

@@ -1,55 +1,19 @@
-import InputError from '@/Components/InputError';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Alert, Button, Field, Input } from '@/Components/ui';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
 
 export default function ForgotPassword({ status }) {
-    const { data, setData, post, processing, errors } = useForm({
-        email: '',
-    });
-
-    const submit = (e) => {
-        e.preventDefault();
-
-        post(route('password.email'));
-    };
+    const form = useForm({ email: '' });
 
     return (
-        <GuestLayout>
-            <Head title="Forgot Password" />
-
-            <div className="mb-4 text-sm text-gray-600">
-                Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that will
-                allow you to choose a new one.
-            </div>
-
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
-
-            <form onSubmit={submit}>
-                <TextInput
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    className="mt-1 block w-full"
-                    isFocused={true}
-                    onChange={(e) => setData('email', e.target.value)}
-                />
-
-                <InputError message={errors.email} className="mt-2" />
-
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Email Password Reset Link
-                    </PrimaryButton>
-                </div>
+        <GuestLayout title="Passwort zurücksetzen" subtitle="Wir senden dir einen Link zum Festlegen eines neuen Passworts.">
+            <Head title="Passwort vergessen" />
+            {status && <div className="mb-4"><Alert type="success">{status}</Alert></div>}
+            <form onSubmit={(e) => { e.preventDefault(); form.post(route('password.email')); }} className="space-y-4">
+                <Field label="E-Mail" error={form.errors.email}><Input type="email" autoFocus value={form.data.email} onChange={(e) => form.setData('email', e.target.value)} required /></Field>
+                <Button type="submit" className="w-full" loading={form.processing}>Link senden</Button>
             </form>
+            <p className="mt-5 text-center text-sm"><Link href={route('login')} className="text-brand-600 hover:underline dark:text-brand-300">Zurück zur Anmeldung</Link></p>
         </GuestLayout>
     );
 }

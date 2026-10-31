@@ -8,6 +8,7 @@ use App\Models\Feature;
 use App\Models\Provider;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\SettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -138,7 +139,7 @@ class AdminTest extends TestCase
 
         $this->actingAs($admin)->patch('/admin/settings', ['values' => ['oauth_github_client_secret' => 'topsecret', 'site_name' => 'Meine KI']])->assertRedirect();
 
-        $this->assertSame('topsecret', app(\App\Services\SettingsService::class)->get('oauth_github_client_secret'));
+        $this->assertSame('topsecret', app(SettingsService::class)->get('oauth_github_client_secret'));
         $this->assertStringNotContainsString('topsecret', \DB::table('settings')->where('key', 'oauth_github_client_secret')->value('value'));
         $this->actingAs($admin)->get('/admin/settings')->assertInertia(fn (Assert $p) => $p->where('values.oauth_github_client_secret', '********')->where('values.site_name', 'Meine KI'));
     }
@@ -156,7 +157,7 @@ class AdminTest extends TestCase
 
     public function test_registration_can_be_disabled(): void
     {
-        app(\App\Services\SettingsService::class)->set('registration_enabled', false);
+        app(SettingsService::class)->set('registration_enabled', false);
 
         $this->get('/register')->assertForbidden();
         $this->post('/register', ['name' => 'X', 'email' => 'x@example.com', 'password' => 'password123', 'password_confirmation' => 'password123'])->assertForbidden();
