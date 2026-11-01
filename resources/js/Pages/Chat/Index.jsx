@@ -5,6 +5,7 @@ import BotAvatar from '@/Components/chat/BotAvatar';
 import Composer from '@/Components/chat/Composer';
 import { PendingAssistant } from '@/Components/chat/BotAvatar';
 import Message from '@/Components/chat/Message';
+import QuickActions from '@/Components/chat/QuickActions';
 import Sidebar from '@/Components/chat/Sidebar';
 import ThemeToggle from '@/Components/ThemeToggle';
 import { Alert, IconButton, Select, cx } from '@/Components/ui';
@@ -359,6 +360,7 @@ export default function ChatIndex({ chat: initialChat, messages: initialMessages
                     </div>
                 )}
 
+                <div className="relative flex min-h-0 flex-1 flex-col">
                 <div ref={scrollRef} onScroll={onScroll} className="scroll-thin min-h-0 flex-1 overflow-y-auto" aria-busy={streaming}>
                     {messages.length === 0 ? (
                         <Welcome name={auth.user.name} disabled={noModels || streaming} onPick={(text) => send({ content: text, files: [], webSearch: false, imageMode: false, agentId: null })} />
@@ -384,6 +386,14 @@ export default function ChatIndex({ chat: initialChat, messages: initialMessages
                         </div>
                     )}
                 </div>
+                {messages.length > 0 && (
+                    <QuickActions
+                        className="absolute bottom-4 right-4 z-10 h-11 w-11"
+                        onNewChat={() => router.visit(route('chat.index'))}
+                        onScrollToBottom={() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })}
+                    />
+                )}
+                </div>
 
                 <div className="shrink-0 px-3 pb-3 pt-2">
                     <div className="mx-auto max-w-3xl">
@@ -404,7 +414,6 @@ export default function ChatIndex({ chat: initialChat, messages: initialMessages
                             projectId={chat?.project_id ?? newChat?.project_id ?? null}
                             disabledReason={disabledReason}
                         />
-                        <p className="mt-2 text-center text-xs text-gray-400">KI-Antworten können Fehler enthalten. Wichtige Angaben bitte prüfen.</p>
                     </div>
                 </div>
             </section>

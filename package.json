@@ -28,6 +28,7 @@
         "axios": "^1.21.0",
         "border-beam": "^1.4.1",
         "highlight.js": "^11.12.0",
+        "liquid-gooey": "^0.2.2",
         "lucide-react": "^1.66.0",
         "metal-fx": "^2.0.11",
         "react-markdown": "^10.1.0",

@@ -14,7 +14,7 @@ const buttonVariants = {
     ghost: 'text-gray-700 hover:bg-gray-100 dark:text-zinc-300 dark:hover:bg-zinc-800',
 };
 
-function useAppTheme() {
+export function useAppTheme() {
     const read = () => (typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     const [theme, setThemeState] = useState(read);
 
