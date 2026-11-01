@@ -1,4 +1,5 @@
 import { Head, router, usePage } from '@inertiajs/react';
+import { BorderBeam } from 'border-beam';
 import { Check } from 'lucide-react';
 import { useState } from 'react';
 import { Alert, Badge, Button, Card, cx } from '@/Components/ui';
@@ -35,8 +36,8 @@ function UsageBar({ label, used, limit }) {
 function PlanCard({ plan, current, billingAvailable, hasStripeSubscription, onChoose, busy }) {
     const limits = Object.entries(limitLabels).filter(([k]) => plan.limits?.[k] !== undefined && plan.limits?.[k] !== null);
 
-    return (
-        <div className={cx('relative flex flex-col rounded-2xl border bg-white p-5 dark:bg-zinc-900', plan.is_featured ? 'border-brand-500 shadow-md' : 'border-gray-200 dark:border-zinc-700')}>
+    const card = (
+        <div className={cx('relative flex h-full flex-col rounded-2xl border bg-white p-5 dark:bg-zinc-900', plan.is_featured ? 'border-brand-500 shadow-md' : 'border-gray-200 dark:border-zinc-700')}>
             {plan.is_featured && <Badge color="blue" className="absolute -top-2.5 left-5">Beliebt</Badge>}
             <h3 className="text-lg font-semibold">{plan.name}</h3>
             <p className="mt-1 min-h-[2.5rem] text-sm text-gray-600 dark:text-zinc-400">{plan.description}</p>
@@ -65,6 +66,12 @@ function PlanCard({ plan, current, billingAvailable, hasStripeSubscription, onCh
             </div>
         </div>
     );
+
+    return plan.is_featured ? (
+        <BorderBeam size="md" colorVariant="colorful" theme="auto" strength={0.7} active={!current}>
+            {card}
+        </BorderBeam>
+    ) : card;
 }
 
 export default function Billing({ plans, currentPlanId, subscription, billingAvailable, usage }) {
