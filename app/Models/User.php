@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role_id', 'is_active', 'custom_instructions', 'about_me', 'preferences', 'limit_overrides'])]
+#[Fillable(['name', 'email', 'password', 'role_id', 'is_active', 'custom_instructions', 'about_me', 'preferences', 'limit_overrides', 'stripe_customer_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -59,6 +59,33 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserFile::class);
     }
 
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Aktuell gültiges Abo (neuestes mit freigeschaltetem Status und nicht abgelaufener Laufzeit).
+     */
+    public function activeSubscription(): ?Subscription
+    {
+        return $this->subscriptions()
+            ->with('plan')
+            ->whereIn('status', Subscription::ENTITLED)
+            ->latest('id')
+            ->get()
+            ->first(fn (Subscription $s) => $s->isEntitled());
+    }
+
+    /**
+     * Wirksamer Plan: bezahltes Abo, sonst der als Standard markierte Gratis-Plan, sonst null.
+     */
+    public function currentPlan(): ?Plan
+    {
+        return $this->activeSubscription()?->plan
+            ?? Plan::query()->where('is_default', true)->where('is_active', true)->first();
+    }
+
     public function memories(): HasMany
     {
         return $this->hasMany(Memory::class);
@@ -79,7 +106,19 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function limit(string $key): ?int
     {
-        $value = ($this->limit_overrides[$key] ?? null) ?? ($this->role?->limits[$key] ?? null);
+        $override = $this->limit_overrides[$key] ?? null;
+
+        if ($override !== null && $override !== '') {
+            return (int) $override;
+        }
+
+        $fromPlan = $this->currentPlan()?->limitFor($key);
+
+        if ($fromPlan !== null) {
+            return $fromPlan < 0 ? null : $fromPlan;
+        }
+
+        $value = $this->role?->limits[$key] ?? null;
 
         return $value === null || $value === '' ? null : (int) $value;
     }

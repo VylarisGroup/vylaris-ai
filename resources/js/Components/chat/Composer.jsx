@@ -3,7 +3,7 @@ import { ArrowUp, Bot, Globe, Image as ImageIcon, Loader2, Mic, Paperclip, Squar
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ThinkingOrb } from 'thinking-orbs';
 import VoiceGlow from '@/Components/chat/VoiceGlow';
-import { IconButton, Select, cx } from '@/Components/ui';
+import { IconButton, Metal, Select, cx } from '@/Components/ui';
 import { useRecorder } from '@/hooks/useVoice';
 import { api, errorMessage, formatBytes } from '@/lib/api';
 
@@ -241,9 +241,11 @@ export default function Composer({ features, agents, streaming, onSend, onStop, 
                                 <Square className="h-4 w-4" />
                             </button>
                         ) : (
-                            <button type="button" onClick={submit} disabled={!canSend} aria-label="Senden" title="Senden (Enter)" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white transition hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-zinc-700 dark:disabled:text-zinc-500">
-                                <ArrowUp className="h-5 w-5" />
-                            </button>
+                            <Metal variant="circle" borderRadius={18} paused={!canSend}>
+                                <button type="button" onClick={submit} disabled={!canSend} aria-label="Senden" title="Senden (Enter)" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white transition hover:bg-brand-700 disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-zinc-700 dark:disabled:text-zinc-500">
+                                    <ArrowUp className="h-5 w-5" />
+                                </button>
+                            </Metal>
                         )}
                     </div>
                 </div>

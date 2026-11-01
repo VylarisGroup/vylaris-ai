@@ -56,7 +56,7 @@ class ChatRunner
         $agent = $this->resolveAgent($options['agent_id'] ?? null, $user);
         $selected = $agent?->model ?? $chat->model;
 
-        ['model' => $model, 'notice' => $notice] = $this->router->resolve($selected, ['vision' => $needsVision], (string) $userMessage->content);
+        ['model' => $model, 'notice' => $notice] = $this->router->resolve($selected, ['vision' => $needsVision], (string) $userMessage->content, $user);
 
         if (! $model) {
             yield ['type' => 'error', 'message' => $notice ?? 'Es ist kein Chat-Modell konfiguriert. Bitte den Administrator informieren.'];

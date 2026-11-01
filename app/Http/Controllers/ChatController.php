@@ -75,7 +75,7 @@ class ChatController extends Controller
      */
     private function models(): array
     {
-        return $this->router->chatModels()->map(fn (AiModel $m) => [
+        return $this->router->chatModels(request()->user())->map(fn (AiModel $m) => [
             'id' => $m->id,
             'name' => $m->display_name,
             'provider' => $m->provider->name,

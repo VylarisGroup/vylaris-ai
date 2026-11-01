@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\SocialLoginController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FolderController;
@@ -80,6 +81,11 @@ Route::middleware(['auth', 'verified.required'])->group(function () {
     Route::delete('/settings/memory/{memory}', [MemoryController::class, 'destroy'])->name('memory.destroy');
     Route::delete('/settings/memory', [MemoryController::class, 'clear'])->name('memory.clear');
 
+    Route::get('/settings/billing', [BillingController::class, 'index'])->name('billing.index');
+    Route::post('/settings/billing/plans/{plan}/checkout', [BillingController::class, 'checkout'])->middleware('throttle:10,1')->name('billing.checkout');
+    Route::post('/settings/billing/portal', [BillingController::class, 'portal'])->middleware('throttle:10,1')->name('billing.portal');
+    Route::patch('/settings/billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
+
     Route::get('/settings/privacy', [PrivacyController::class, 'index'])->name('privacy.index');
     Route::post('/settings/privacy/export', [PrivacyController::class, 'requestExport'])->middleware('throttle:3,60')->name('privacy.export');
     Route::get('/settings/privacy/export/download', [PrivacyController::class, 'downloadExport'])->name('privacy.export.download');
@@ -121,6 +127,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified.required',
         Route::post('/roles', [Admin\RoleController::class, 'store'])->name('roles.store');
         Route::patch('/roles/{role}', [Admin\RoleController::class, 'update'])->name('roles.update');
         Route::delete('/roles/{role}', [Admin\RoleController::class, 'destroy'])->name('roles.destroy');
+    });
+
+    Route::middleware('permission:admin.plans')->group(function () {
+        Route::get('/plans', [Admin\PlanController::class, 'index'])->name('plans.index');
+        Route::post('/plans', [Admin\PlanController::class, 'store'])->name('plans.store');
+        Route::patch('/plans/{plan}', [Admin\PlanController::class, 'update'])->name('plans.update');
+        Route::delete('/plans/{plan}', [Admin\PlanController::class, 'destroy'])->name('plans.destroy');
+        Route::post('/subscriptions', [Admin\PlanController::class, 'assign'])->name('subscriptions.assign');
+        Route::delete('/subscriptions/{subscription}', [Admin\PlanController::class, 'revoke'])->name('subscriptions.revoke');
     });
 
     Route::middleware('permission:admin.settings')->group(function () {

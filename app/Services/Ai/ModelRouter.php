@@ -3,6 +3,7 @@
 namespace App\Services\Ai;
 
 use App\Models\AiModel;
+use App\Models\User;
 use App\Services\SettingsService;
 use Illuminate\Support\Collection;
 
@@ -16,8 +17,10 @@ class ModelRouter
     /**
      * @return Collection<int, AiModel>
      */
-    public function chatModels(): Collection
+    public function chatModels(?User $user = null): Collection
     {
+        $plan = $user?->currentPlan();
+
         return AiModel::query()
             ->with(['provider', 'capabilities'])
             ->where('is_enabled', true)
@@ -25,16 +28,18 @@ class ModelRouter
             ->whereHas('capabilities', fn ($q) => $q->where('capability', 'chat'))
             ->orderBy('sort')
             ->orderBy('display_name')
-            ->get();
+            ->get()
+            ->filter(fn (AiModel $m) => $plan === null || $plan->allowsTier($m->tier))
+            ->values();
     }
 
     /**
      * @param  array{vision?: bool, tools?: bool}  $needs
      * @return array{model: ?AiModel, notice: ?string}
      */
-    public function resolve(?AiModel $selected, array $needs, string $prompt): array
+    public function resolve(?AiModel $selected, array $needs, string $prompt, ?User $user = null): array
     {
-        $models = $this->chatModels();
+        $models = $this->chatModels($user);
         $needsVision = $needs['vision'] ?? false;
 
         if ($selected) {

@@ -10,7 +10,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([RoleSeeder::class, FeatureSeeder::class]);
+        $this->call([RoleSeeder::class, FeatureSeeder::class, PlanSeeder::class]);
 
         $email = env('ADMIN_EMAIL');
         $password = env('ADMIN_PASSWORD');

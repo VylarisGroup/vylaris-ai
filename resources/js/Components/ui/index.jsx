@@ -1,5 +1,7 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { Loader2, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { MetalFx } from 'metal-fx';
 
 export function cx(...classes) {
     return classes.filter(Boolean).join(' ');
@@ -12,8 +14,51 @@ const buttonVariants = {
     ghost: 'text-gray-700 hover:bg-gray-100 dark:text-zinc-300 dark:hover:bg-zinc-800',
 };
 
-export function Button({ variant = 'primary', size = 'md', loading = false, className, children, ...props }) {
+function useAppTheme() {
+    const read = () => (typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    const [theme, setThemeState] = useState(read);
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => setThemeState(read()));
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        return () => observer.disconnect();
+    }, []);
+
+    return theme;
+}
+
+function usePrefersReducedMotion() {
+    const [reduced, setReduced] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+    useEffect(() => {
+        const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const update = () => setReduced(query.matches);
+        query.addEventListener('change', update);
+
+        return () => query.removeEventListener('change', update);
+    }, []);
+
+    return reduced;
+}
+
+/**
+ * Metal-Effekt (libraries.dev/metal) um ein beliebiges Button-Element. Folgt dem App-Theme,
+ * friert bei "reduzierter Bewegung" oder deaktiviertem Element ein.
+ */
+export function Metal({ children, variant = 'button', preset = 'chromatic', strength = 1, paused = false, borderRadius = 8, className }) {
+    const theme = useAppTheme();
+    const reducedMotion = usePrefersReducedMotion();
+
     return (
+        <MetalFx variant={variant} preset={preset} theme={theme} strength={paused ? 0.5 : strength} paused={paused || reducedMotion} borderRadius={borderRadius} className={className}>
+            {children}
+        </MetalFx>
+    );
+}
+
+export function Button({ variant = 'primary', size = 'md', loading = false, metal, className, children, ...props }) {
+    const button = (
         <button
             {...props}
             disabled={props.disabled || loading}
@@ -28,6 +73,13 @@ export function Button({ variant = 'primary', size = 'md', loading = false, clas
             {children}
         </button>
     );
+
+    // Primäre Buttons erhalten standardmässig den Metal-Effekt; mit metal={false} abschaltbar.
+    if (!(metal ?? variant === 'primary')) {
+        return button;
+    }
+
+    return <Metal paused={Boolean(props.disabled || loading)}>{button}</Metal>;
 }
 
 export function IconButton({ label, className, children, ...props }) {

@@ -31,6 +31,9 @@ class SettingsService
             'oauth_google_client_secret' => ['label' => 'Google OAuth Client-Secret', 'type' => 'string', 'default' => '', 'secret' => true, 'group' => 'OAuth'],
             'oauth_github_client_id' => ['label' => 'GitHub OAuth Client-ID', 'type' => 'string', 'default' => '', 'group' => 'OAuth'],
             'oauth_github_client_secret' => ['label' => 'GitHub OAuth Client-Secret', 'type' => 'string', 'default' => '', 'secret' => true, 'group' => 'OAuth'],
+            'billing_enabled' => ['label' => 'Abos und Bezahlung aktivieren (Stripe)', 'type' => 'bool', 'default' => false, 'group' => 'Abos'],
+            'stripe_secret_key' => ['label' => 'Stripe Secret Key (sk_…)', 'type' => 'string', 'default' => '', 'secret' => true, 'group' => 'Abos'],
+            'stripe_webhook_secret' => ['label' => 'Stripe Webhook-Signing-Secret (whsec_…)', 'type' => 'string', 'default' => '', 'secret' => true, 'group' => 'Abos'],
             // Interne Einstellungen (Updater/Cron): werden über eigene Seiten verwaltet, nicht in den Plattform-Einstellungen.
             'update_repo' => ['label' => 'Update-Repository', 'type' => 'string', 'default' => 'VylarisGroup/vylaris-ai', 'group' => 'Updates', 'hidden' => true],
             'update_branch' => ['label' => 'Update-Branch', 'type' => 'string', 'default' => 'main', 'group' => 'Updates', 'hidden' => true],

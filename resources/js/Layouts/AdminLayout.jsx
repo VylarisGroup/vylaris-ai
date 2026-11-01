@@ -10,6 +10,7 @@ export default function AdminLayout({ title, children }) {
         can('admin.providers') && { label: 'Provider & Modelle', href: route('admin.providers.index'), active: route().current('admin.providers.*') },
         can('admin.features') && { label: 'Funktionen', href: route('admin.features.index'), active: route().current('admin.features.*') },
         can('admin.features') && { label: 'Agenten', href: route('admin.agents.index'), active: route().current('admin.agents.*') },
+        can('admin.plans') && { label: 'Abos & Pläne', href: route('admin.plans.index'), active: route().current('admin.plans.*') || route().current('admin.subscriptions.*') },
         can('admin.updates') && { label: 'Updates & Cron', href: route('admin.updates.index'), active: route().current('admin.updates.*') },
         can('admin.users') && { label: 'Benutzer', href: route('admin.users.index'), active: route().current('admin.users.*') },
         can('admin.users') && { label: 'Rollen & Limits', href: route('admin.roles.index'), active: route().current('admin.roles.*') },

@@ -75,6 +75,14 @@ git add -A && git commit -m "Release 2.3.0" && git push
 
 Ohne `public/build/manifest.json` im Release bricht der Updater zum Schutz der Installation ab.
 
+## Abos & Pläne
+
+Admin → **Abos & Pläne**: Pläne mit Preis, Intervall, Testtagen, Limits (Nachrichten/Tag, Tokens/Monat, Uploads/Tag) und erlaubten Modellstufen. Ein kostenloser Plan kann als *Standardplan* für alle ohne Abo markiert werden. Limit-Rangfolge: persönlicher Override → Plan → Rollen-Limit (`-1` im Plan = unbegrenzt, leer = Rollen-Limit).
+
+* Benutzer sehen Pläne und Verbrauch unter **Einstellungen → Abo & Nutzung**.
+* Bezahlung über Stripe Checkout (kein SDK nötig): unter **Plattform → Abos** «Abos aktivieren», Secret Key und Webhook-Secret eintragen. Webhook-URL (Admin → Abos & Pläne): `https://deine-domain/webhooks/stripe` mit den Events `checkout.session.completed` und `customer.subscription.*`. Kundenportal (Zahlungsmittel, Rechnungen) wird in Stripe aktiviert.
+* Abos lassen sich auch manuell vergeben (Geschenk, Rechnung). Pläne werden beim Setup (`db:seed`) mit Gratis/Pro/Max angelegt; bei bestehenden Installationen legst du sie im Admin an.
+
 ## Cron per URL
 
 Hosting ohne Shell-Cron (z. B. Plesk-„Geplante Aufgaben“ → *URL abrufen*, cron-job.org): Die URL aus *Admin → Updates & Cron* (`/cron/<geheimer-token>`) jede Minute aufrufen. Sie führt `schedule:run` aus und – bei Datenbank-Queue – für bis zu 40 Sekunden den Queue-Worker (`--stop-when-empty`). Die Route läuft ohne Session/Cookies, ist ratenbegrenzt und gegen parallele Läufe gesperrt. Anzeigen oder neu erzeugen: Admin-Bereich oder `php artisan vylaris:cron-token [--regenerate]`.
@@ -130,6 +138,7 @@ Eingesetzt (Installation und Lizenz gemäss Paket):
 
 * [`thinking-orbs`](https://libraries.dev) – „Thinking Orb“ als Denk-/Lade-Indikator und Bot-Avatar-Zustand.
 * [`border-beam`](https://libraries.dev) – animierter Rand um das Eingabefeld während Streaming/Aufnahme.
+* [`metal-fx`](https://libraries.dev/metal) – Metal-Effekt (WebGL) auf primären Buttons und dem Senden-Knopf (`Button`/`Metal` in `Components/ui`). Mit `metal={false}` abschaltbar; folgt dem Theme und friert bei «reduzierter Bewegung» ein.
 
 **Ehrliche Einschränkung:** Für *Voice Glow* und *Bot Avatars* war zum Zeitpunkt der Umsetzung kein installierbares Paket verfügbar. Beide Komponenten wurden deshalb als eigene React-Komponenten umgesetzt (`Components/chat/VoiceGlow.jsx`, `BotAvatar.jsx`; der Avatar basiert auf dem Thinking Orb). Wird ein offizielles Paket veröffentlicht, lassen sie sich an einer Stelle austauschen.
 
